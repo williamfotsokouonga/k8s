@@ -11,6 +11,10 @@ CONTAINERD_VERSION=2.0.4
 CRICTL_VERSION=1.33.0
 RUNC_VERSION=1.3.0
 CNI_VERSION=1.7.1
+ETCDCTL_VERSION=v3.5.21
+IPADDR=$(hostname -I | awk '{print $1}')
+NODENAME=$(hostname -s)
+POD_CIDR="192.168.0.0/16"
 
 # get platform
 PLATFORM=`uname -p`
@@ -173,9 +177,7 @@ EOF
 
 ### 10 : Setup Control Plane
 echo "### 10 - CONFIGURE CONTROLPLANE ###"
-IPADDR="192.168.64.11"
-NODENAME=$(hostname -s)
-POD_CIDR="192.168.0.0/16"
+sudo apt install net-tools -y
 sudo kubeadm init --apiserver-advertise-address=$IPADDR  --apiserver-cert-extra-sans=$IPADDR  --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors Swap
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -184,3 +186,13 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ### 11 : Install Calico NetworkPlugins
 echo "### 10 - INSTALLATION CALICO NETWORK PLUGIN ###"
 kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+### 12 : Install ETCDCTL ###
+echo "### 12 - INSTALLATION ETCDCTL ###"
+ETCDCTL_ARCH=$(dpkg --print-architecture)
+ETCDCTL_VERSION_FULL=etcd-${ETCDCTL_VERSION}-linux-${ETCDCTL_ARCH}
+sudo wget https://github.com/etcd-io/etcd/releases/download/${ETCDCTL_VERSION}/${ETCDCTL_VERSION_FULL}.tar.gz
+sudo tar xzf ${ETCDCTL_VERSION_FULL}.tar.gz ${ETCDCTL_VERSION_FULL}/etcd
+sudo mv ${ETCDCTL_VERSION_FULL}/etcdctl /usr/bin/
+sudo rm -rf ${ETCDCTL_VERSION_FULL} ${ETCDCTL_VERSION_FULL}.tar.gz
+etcdctl version
