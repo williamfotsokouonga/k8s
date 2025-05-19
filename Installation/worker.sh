@@ -177,5 +177,5 @@ EOF
 
 ### 10 : Setup WORKER
 echo "### 10 - CONFIGURE WORKER ###"
-sudo kubeadm join 172.31.13.96:6443 --token 0d47wr.hp1t7mupyqpympyo \
-	--discovery-token-ca-cert-hash sha256:aeaf05ebb2012faee43bb54aa8df27710c1e2458dc0b747ec94620a8ea169f16
+sudo kubeadm join x.x.x.x:6443 --token x.x \
+	--discovery-token-ca-cert-hash sha256:xxxxxxxxx
